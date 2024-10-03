@@ -1,3 +1,4 @@
+
 #include <ncurses.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -121,8 +122,8 @@ int main() {
         if (ch == 'q') break; // Quit game
         if (ch == 'w') move_paddle(&left_paddle, -1);
         if (ch == 's') move_paddle(&left_paddle, 1);
-        if (ch == KEY_UP) move_paddle(&right_paddle, -1);
-        if (ch == KEY_DOWN) move_paddle(&right_paddle, 1);
+        if (ch == 'i') move_paddle(&right_paddle, -1);
+        if (ch == 'k') move_paddle(&right_paddle, 1);
 
         // Update game state
         update_ball(&ball, &left_paddle, &right_paddle);

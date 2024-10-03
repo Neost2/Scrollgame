@@ -1,67 +1,115 @@
-#include <stdio.h>
+#include <ncurses.h>
 #include <stdlib.h>
 #include <time.h>
 #include <unistd.h>
 
-#define WIDTH 20
-#define HEIGHT 10
+#define WORLD_WIDTH 40     // Width of the game world
+#define SCREEN_HEIGHT 10   // Height of the visible screen
+#define PLAYER_CHAR '@'    // Player character
+#define OBSTACLE_CHAR '#'  // Obstacle character
+#define EMPTY_CHAR ' '     // Empty space
 
-void clear_screen() {
-    system("clear");  // Use "cls" instead of "clear" on Windows
+// Function to initialize ncurses
+void initNcurses() {
+    initscr();             // Start ncurses mode
+    cbreak();              // Disable line buffering
+    noecho();              // Don't show input characters
+    curs_set(FALSE);       // Hide the cursor
+    keypad(stdscr, TRUE);  // Enable special keys like arrows
+    timeout(100);          // Set input timeout for non-blocking input
 }
 
-void draw_game(int player_pos, int obstacle_pos) {
-    for (int y = 0; y < HEIGHT; y++) {
-        for (int x = 0; x < WIDTH; x++) {
-            if (y == HEIGHT - 1 && x == player_pos)
-                printf("P");
-            else if (y == obstacle_pos && x == WIDTH - 1)
-                printf("O");
-            else
-                printf(".");
+// Function to draw the game screen
+void drawGame(int playerPos, int obstacles[], int numObstacles) {
+    clear();  // Clear the screen before drawing
+    for (int y = 0; y < SCREEN_HEIGHT; y++) {
+        for (int x = 0; x < WORLD_WIDTH; x++) {
+            if (y == SCREEN_HEIGHT - 1 && x == playerPos) {
+                mvaddch(y, x, PLAYER_CHAR);  // Draw the player
+            }
+            else if (obstacles[x] == y) {
+                mvaddch(y, x, OBSTACLE_CHAR);  // Draw the obstacle
+            }
+            else {
+                mvaddch(y, x, EMPTY_CHAR);  // Draw empty space
+            }
         }
-        printf("\n");
     }
+    refresh();  // Refresh the screen to display the changes
+}
+
+// Function to move the obstacles left
+void moveObstacles(int obstacles[], int numObstacles) {
+    for (int i = 1; i < WORLD_WIDTH; i++) {
+        obstacles[i - 1] = obstacles[i];  // Move obstacles to the left
+    }
+    // Randomly place a new obstacle on the right side
+    if (rand() % 4 == 0) {
+        obstacles[WORLD_WIDTH - 1] = rand() % (SCREEN_HEIGHT - 1);
+    }
+    else {
+        obstacles[WORLD_WIDTH - 1] = -1;  // No obstacle
+    }
+}
+
+// Function to check if the player hit an obstacle
+int checkCollision(int playerPos, int obstacles[]) {
+    return obstacles[playerPos] == SCREEN_HEIGHT - 1;  // Check if obstacle is in the same place as the player
 }
 
 int main() {
-    int player_pos = WIDTH / 2;
-    int obstacle_pos = 0;
-    int score = 0;
+    int playerPos = WORLD_WIDTH / 2;  // Start player in the middle of the screen
+    int obstacles[WORLD_WIDTH];       // Array to store obstacle positions
+    int running = 1;                  // Game running flag
 
+    // Initialize random number generator and ncurses
     srand(time(NULL));
+    initNcurses();
 
-    while (1) {
-        clear_screen();
-        draw_game(player_pos, obstacle_pos);
-        printf("Score: %d\n", score);
+    // Initialize the obstacles array
+    for (int i = 0; i < WORLD_WIDTH; i++) {
+        obstacles[i] = -1;  // No obstacles at the start
+    }
 
-        // Move player
-        char input;
-        if (scanf(" %c", &input) == 1) {
-            if (input == 'a' && player_pos > 0)
-                player_pos--;
-            else if (input == 'd' && player_pos < WIDTH - 1)
-                player_pos++;
-        }
-        int x;
-        srand(time(NULL));
-        x = (rand()%(20 -1));
-        // Move obstacle
-        obstacle_pos++;
-        if (obstacle_pos >= HEIGHT) {
-            obstacle_pos = 0;
-            score++;
-        }
+    // Main game loop
+    while (running) {
+        // Draw the game world
+        drawGame(playerPos, obstacles, WORLD_WIDTH);
 
-        // Check collision
-        if (obstacle_pos == HEIGHT - 1 && player_pos == WIDTH - 1) {
-            printf("Game Over! Final Score: %d\n", score);
+        // Get user input (non-blocking)
+        int ch = getch();
+        switch (ch) {
+        case KEY_LEFT:
+            if (playerPos > 0) playerPos--;  // Move player left
+            break;
+        case KEY_RIGHT:
+            if (playerPos < WORLD_WIDTH - 1) playerPos++;  // Move player right
+            break;
+        case 'q':  // Quit the game
+            running = 0;
             break;
         }
 
-        usleep(100000);  // Delay for smoother gameplay
+        // Move the obstacles
+        moveObstacles(obstacles, WORLD_WIDTH);
+
+        // Check for collisions
+        if (checkCollision(playerPos, obstacles)) {
+            running = 0;  // End the game if there's a collision
+        }
+
+        // Delay to control game speed (lower is faster)
+        usleep(100000);  // 100ms delay
     }
+
+    // Game over message
+    clear();
+    mvprintw(SCREEN_HEIGHT / 2, WORLD_WIDTH / 2 - 5, "Game Over!");
+    refresh();
+    getch();  // Wait for a key press
+
+    // End ncurses mode
+    endwin();
 
     return 0;
 }
