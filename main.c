@@ -20,7 +20,7 @@ void initNcurses() {
 }
 
 // Function to draw the game screen
-void drawGame(int playerPos, int obstacles[], int numObstacles) {
+void drawGame(int playerPos, int obstacles[]) {
     clear();  // Clear the screen before drawing
     for (int y = 0; y < SCREEN_HEIGHT; y++) {
         for (int x = 0; x < WORLD_WIDTH; x++) {
@@ -39,16 +39,22 @@ void drawGame(int playerPos, int obstacles[], int numObstacles) {
 }
 
 // Function to move the obstacles left
-void moveObstacles(int obstacles[], int numObstacles) {
-    for (int i = 1; i < WORLD_WIDTH; i++) {
-        obstacles[i - 1] = obstacles[i];  // Move obstacles to the left
-    }
-    // Randomly place a new obstacle on the right side
-    if (rand() % 4 == 0) {
-        obstacles[WORLD_WIDTH - 1] = rand() % (SCREEN_HEIGHT - 1);
-    }
-    else {
-        obstacles[WORLD_WIDTH - 1] = -1;  // No obstacle
+void moveObstacles(int obstacles[]) {
+    for (int i = 0; i < WORLD_WIDTH; i++) {
+        // Randomly decide to move the obstacle up or down
+        if (obstacles[i] != -1) {
+            if (rand() % 2 == 0 && obstacles[i] > 0) {
+                obstacles[i]--;  // Move up
+            }
+            else if (obstacles[i] < SCREEN_HEIGHT - 1) {
+                obstacles[i]++;  // Move down
+            }
+        }
+
+        // Randomly place a new obstacle
+        if (rand() % 10 == 0) {  // Adjust frequency of new obstacles
+            obstacles[i] = rand() % SCREEN_HEIGHT; // Random position
+        }
     }
 }
 
@@ -74,7 +80,7 @@ int main() {
     // Main game loop
     while (running) {
         // Draw the game world
-        drawGame(playerPos, obstacles, WORLD_WIDTH);
+        drawGame(playerPos, obstacles);
 
         // Get user input (non-blocking)
         int ch = getch();
@@ -91,7 +97,7 @@ int main() {
         }
 
         // Move the obstacles
-        moveObstacles(obstacles, WORLD_WIDTH);
+        moveObstacles(obstacles);
 
         // Check for collisions
         if (checkCollision(playerPos, obstacles)) {
