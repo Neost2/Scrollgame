@@ -7,7 +7,7 @@
 #define PADDLE_WIDTH 1
 #define BALL_SPEED 1
 #define PADDLE_SPEED 1
-#define DELAY 30000
+#define DELAY 80000
 
 // Paddle structure
 typedef struct {
@@ -18,7 +18,7 @@ typedef struct {
 // Ball structure
 typedef struct {
     int x, y;
-    int vel_x, vel_y;
+    double vel_x, vel_y;
 } Ball;
 
 // Game field
