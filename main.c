@@ -43,7 +43,7 @@ void moveObstacles(int obstacles[]) {
     for (int i = 0; i < WORLD_WIDTH; i++) {
         // Randomly decide to move the obstacle up or down
         if (obstacles[i] != -1) {
-            if (rand() % 2 == 0 && obstacles[i] > 0) {
+            if (rand() % 100 == 0 && obstacles[i] > 0) {
                 obstacles[i]++;  // Move down
             }
             else if (obstacles[i] < SCREEN_HEIGHT - 1) {
