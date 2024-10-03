@@ -49,8 +49,8 @@ void moveObstacles(int obstacles[]) {
             else*/ if (obstacles[i] < SCREEN_HEIGHT - 1) {
                 obstacles[i]++;  // Move down
             }
-            if (obsticals[i] = SCREEN_HEIGHT - 10) {
-                obstacals[i] = NULL;
+            if (obstacles[i] = SCREEN_HEIGHT - 10) {
+                obstacles[i] = NULL;
             }
         }
 
