@@ -52,7 +52,7 @@ void moveObstacles(int obstacles[]) {
         }
 
         // Randomly place a new obstacle
-        if (rand() % 4 == 0) {  // Adjust frequency of new obstacles
+        if (rand() % 100 == 0) {  // Adjust frequency of new obstacles
             obstacles[i] = rand() % SCREEN_HEIGHT; // Random position
         }
     }
